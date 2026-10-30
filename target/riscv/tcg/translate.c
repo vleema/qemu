@@ -1256,6 +1256,21 @@ const RISCVDecoder decoder_table[] = {
 
 const size_t decoder_table_size = ARRAY_SIZE(decoder_table);
 
+static bool trans_mac(DisasContext *ctx, arg_mac *a)
+{
+    TCGv source1 = get_gpr(ctx, a->rs1, EXT_NONE);
+    TCGv source2 = get_gpr(ctx, a->rs2, EXT_NONE);
+    TCGv old_rd  = get_gpr(ctx, a->rd,  EXT_NONE);
+    TCGv dest    = tcg_temp_new();
+
+    tcg_gen_mul_tl(dest, source1, source2);
+    tcg_gen_add_tl(dest, dest, old_rd);
+
+    gen_set_gpr(ctx, a->rd, dest);
+
+    return true;
+}
+
 static void decode_opc(CPURISCVState *env, DisasContext *ctx)
 {
     uint32_t opcode;
